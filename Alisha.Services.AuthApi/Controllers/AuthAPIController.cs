@@ -24,8 +24,6 @@ namespace Alisha.Services.AuthAPI.Controllers
             _response = new();
         }
 
-
-
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegistrationRequestDto model)
         {
@@ -53,7 +51,6 @@ namespace Alisha.Services.AuthAPI.Controllers
             }
             _response.Result = loginResponse;
             return Ok(_response);
-
         }
 
         [HttpPost("AssignRole")]
