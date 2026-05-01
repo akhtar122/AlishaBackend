@@ -3,11 +3,24 @@ using Alisha.Services.AuthAPI.Data;
 using Alisha.Services.AuthAPI.Service;
 using Alisha.Services.AuthAPI.Service.IService;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddCors(p => p.AddPolicy("corspolicy", build =>
+{
+    // Add the frontend origins here. Note: CORS uses origins (scheme + host + port), not full paths.
+    build.WithOrigins(
+            "http://localhost:3000",
+            "https://v0.app" // origin for https://v0.app/chat/...
+         )
+         .AllowAnyMethod()
+         .AllowAnyHeader();
+    // If you need cookies/credentials, also call .AllowCredentials() (and don't use AllowAnyOrigin).
+}));
 builder.Services.AddDbContext<AppDbContext>(option =>
 {
     option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -35,7 +48,12 @@ app.UseSwaggerUI(c =>
         c.RoutePrefix = string.Empty;
     }
 });
+
 app.UseHttpsRedirection();
+
+// Apply CORS BEFORE authentication/authorization and before controllers
+app.UseCors("corspolicy");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
